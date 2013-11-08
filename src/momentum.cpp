@@ -67,7 +67,7 @@ std::vector< std::pair<uint32_t, uint32_t> > momentum_search(uint256 midHash)
 
         
         // Found a collision!
-        if (turtle[turtle_offset] >> (64 - SEARCH_SPACE_BITS) == hare[hare_offset] >> (64 - SEARCH_SPACE_BITS) {
+        if (turtle[turtle_offset] >> (64 - SEARCH_SPACE_BITS) == hare[hare_offset] >> (64 - SEARCH_SPACE_BITS)) {
             fount_hit = true;
             break;
         }

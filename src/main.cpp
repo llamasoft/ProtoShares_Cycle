@@ -4609,7 +4609,8 @@ void static BitcoinMiner(CWallet *pwallet)
 		for(int i=0;i<1;i++){
 			pblock->nNonce=pblock->nNonce+1;
 			testHash=pblock->CalculateBestBirthdayHash();
-			nHashesDone++;
+            if (testHash < uint256("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))
+                nHashesDone++;
 			printf("testHash %s\n", testHash.ToString().c_str());
 			printf("Hash Target %s\n", hashTarget.ToString().c_str());
 		    
