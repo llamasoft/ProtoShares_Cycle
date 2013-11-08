@@ -37,13 +37,13 @@ std::vector< std::pair<uint32_t, uint32_t> > momentum_search(uint256 midHash)
     uint32_t turtle_nonce = 0;
     uint32_t turtle_offset = 0;
     uint64_t turtle_minhash = 0;
-    uint64_t turtle[8]; 
+    uint64_t turtle_hash[8]; 
     
     // X'
     uint32_t hare_nonce = 0;
     uint32_t hare_offset = 0;
     uint64_t hare_minhash = 0;
-    uint64_t hare[8];
+    uint64_t hare_hash[8];
     
     // Defining X_0
     *index = 0;
@@ -52,8 +52,8 @@ std::vector< std::pair<uint32_t, uint32_t> > momentum_search(uint256 midHash)
     turtle_minhash = result_hash[0];
     hare_minhash = result_hash[0];
     for (unsigned int sz = 0; sz < BIRTHDAYS_PER_HASH; ++sz) {
-        turtle[sz] = result_hash[sz];
-        hare[sz] = result_hash[sz];
+        turtle_hash[sz] = result_hash[sz];
+        hare_hash[sz] = result_hash[sz];
         
         if (result_hash[sz] < turtle_minhash) { 
             turtle_minhash = result_hash[sz];
@@ -80,7 +80,7 @@ std::vector< std::pair<uint32_t, uint32_t> > momentum_search(uint256 midHash)
 
         
         // Found a collision!
-        if ((turtle[turtle_offset] >> (64 - SEARCH_SPACE_BITS)) == (hare[hare_offset] >> (64 - SEARCH_SPACE_BITS))) {
+        if ((turtle_hash[turtle_offset] >> (64 - SEARCH_SPACE_BITS)) == (hare_hash[hare_offset] >> (64 - SEARCH_SPACE_BITS))) {
             if (turtle_nonce != hare_nonce && turtle_offset != hare_offset) {
                 found_hit = true;
                 break;
@@ -100,10 +100,13 @@ std::vector< std::pair<uint32_t, uint32_t> > momentum_search(uint256 midHash)
     std::cerr << "   Iteration:     " << i << "\n";
     std::cerr << "   Turtle Nonce:  " << turtle_nonce  << "\n";
     std::cerr << "   Turtle Offset: " << turtle_offset << "\n";
-    std::cerr << "   Turtle Hash:   " << (turtle[turtle_offset] >> (64 - SEARCH_SPACE_BITS)) << "\n";
+    std::cerr << "   Turtle Hash:   " << (turtle_hash[turtle_offset] >> (64 - SEARCH_SPACE_BITS)) << "\n";
+    std::cerr << "   Turtle Nonce Valid: " << (turtle_nonce < MAX_MOMENTUM_NONCE) << "\n";
     std::cerr << "   Hare Nonce:    " << hare_nonce  << "\n";
     std::cerr << "   Hare Offset:   " << hare_offset << "\n";
-    std::cerr << "   Hare Hash:     " << (hare[hare_offset] >> (64 - SEARCH_SPACE_BITS)) << "\n";
+    std::cerr << "   Hare Hash:     " << (hare_hash[hare_offset] >> (64 - SEARCH_SPACE_BITS)) << "\n";
+    std::cerr << "   Hare Nonce Valid:   " << (hare_nonce < MAX_MOMENTUM_NONCE) << "\n";
+    std::cerr << "\n";
     
     results.push_back( std::make_pair(turtle_nonce + turtle_offset, hare_nonce + hare_offset) );
     return results;
@@ -114,29 +117,29 @@ std::vector< std::pair<uint32_t, uint32_t> > momentum_search(uint256 midHash)
     // Set X' = X
     hare_nonce = turtle_nonce;
     hare_offset = turtle_offset;
-    for (unsigned int sz = 0; sz < BIRTHDAYS_PER_HASH; ++sz) { hare[sz] = turtle[sz]; }
+    for (unsigned int sz = 0; sz < BIRTHDAYS_PER_HASH; ++sz) { hare_hash[sz] = turtle_hash[sz]; }
     
     // Reset X = X_0
     turtle_nonce = 0;
     turtle_offset = 0;
     *index = 0;
     SHA512((unsigned char *)hash_tmp, sizeof(hash_tmp), (unsigned char *)result_hash);
-    for (unsigned int sz = 0; sz < BIRTHDAYS_PER_HASH; ++sz) { turtle[sz] = result_hash[sz]; }
+    for (unsigned int sz = 0; sz < BIRTHDAYS_PER_HASH; ++sz) { turtle_hash[sz] = result_hash[sz]; }
     
     
     // Step 2: find where the hit came from
     uint32_t j;
     for (j = 0; j < i; ++j) {
-        if ((turtle[turtle_offset] >> (64 - SEARCH_SPACE_BITS)) == (hare[hare_offset] >> (64 - SEARCH_SPACE_BITS))) {
+        if ((turtle_hash[turtle_offset] >> (64 - SEARCH_SPACE_BITS)) == (hare_hash[hare_offset] >> (64 - SEARCH_SPACE_BITS))) {
             results.push_back( std::make_pair(turtle_nonce + turtle_offset, hare_nonce + hare_offset) );
             std::cerr << "WOOT WOOT!\n";
             std::cerr << "   Iteration:     " << j << "\n";
             std::cerr << "   Turtle Nonce:  " << turtle_nonce  << "\n";
             std::cerr << "   Turtle Offset: " << turtle_offset << "\n";
-            std::cerr << "   Turtle Hash:   " << (turtle[turtle_offset] >> (64 - SEARCH_SPACE_BITS)) << "\n";
+            std::cerr << "   Turtle Hash:   " << (turtle_hash[turtle_offset] >> (64 - SEARCH_SPACE_BITS)) << "\n";
             std::cerr << "   Hare Nonce:    " << hare_nonce  << "\n";
             std::cerr << "   Hare Offset:   " << hare_offset << "\n";
-            std::cerr << "   Hare Hash:     " << (hare[hare_offset] >> (64 - SEARCH_SPACE_BITS)) << "\n";
+            std::cerr << "   Hare Hash:     " << (hare_hash[hare_offset] >> (64 - SEARCH_SPACE_BITS)) << "\n";
             return results;
         }
         
@@ -157,10 +160,10 @@ std::vector< std::pair<uint32_t, uint32_t> > momentum_search(uint256 midHash)
     std::cerr << "   Iteration:     " << j << "\n";
     std::cerr << "   Turtle Nonce:  " << turtle_nonce  << "\n";
     std::cerr << "   Turtle Offset: " << turtle_offset << "\n";
-    std::cerr << "   Turtle Hash:   " << (turtle[turtle_offset] >> (64 - SEARCH_SPACE_BITS)) << "\n";
+    std::cerr << "   Turtle Hash:   " << (turtle_hash[turtle_offset] >> (64 - SEARCH_SPACE_BITS)) << "\n";
     std::cerr << "   Hare Nonce:    " << hare_nonce  << "\n";
     std::cerr << "   Hare Offset:   " << hare_offset << "\n";
-    std::cerr << "   Hare Hash:     " << (hare[hare_offset] >> (64 - SEARCH_SPACE_BITS)) << "\n";
+    std::cerr << "   Hare Hash:     " << (hare_hash[hare_offset] >> (64 - SEARCH_SPACE_BITS)) << "\n";
     
     return results;
 }
