@@ -8,6 +8,22 @@ namespace bts
 #define SEARCH_SPACE_BITS 50
 #define BIRTHDAYS_PER_HASH 8
 
+// I'm a terrible person.
+#define UPDATE_HASH(varname)                                                                   \
+    if (varname##_offset >= BIRTHDAYS_PER_HASH) {                                              \
+        varname##_offset = varname##_offset % BIRTHDAYS_PER_HASH;                              \
+        varname##_nonce = varname##_minhash;                                                   \
+                                                                                               \
+        *index = varname##_nonce;                                                              \
+        SHA512((unsigned char *)hash_tmp, sizeof(hash_tmp), (unsigned char *)result_hash);     \
+                                                                                               \
+        varname##_minhash = result_hash[0];                                                    \
+        for (unsigned int sz = 0; sz < BIRTHDAYS_PER_HASH; ++sz) {                             \
+            if (result_hash[sz] < varname##_minhash) { varname##_minhash = result_hash[sz]; }  \
+            varname##[sz] = result_hash[sz];                                                   \
+        }                                                                                      \
+    }
+
 std::vector< std::pair<uint32_t, uint32_t> > momentum_search(uint256 midHash)
 {
     std::vector< std::pair<uint32_t, uint32_t> > results;
@@ -20,55 +36,55 @@ std::vector< std::pair<uint32_t, uint32_t> > momentum_search(uint256 midHash)
     // X
     uint32_t turtle_nonce = 0;
     uint32_t turtle_offset = 0;
+    uint64_t turtle_minhash = 0;
     uint64_t turtle[8]; 
     
     // X'
     uint32_t hare_nonce = 0;
     uint32_t hare_offset = 0;
+    uint64_t hare_minhash = 0;
     uint64_t hare[8];
     
     // Defining X_0
     *index = 0;
     uint64_t result_hash[8];
     SHA512((unsigned char *)hash_tmp, sizeof(hash_tmp), (unsigned char *)result_hash);
-    for (unsigned int sz = 0; sz < BIRTHDAYS_PER_HASH; ++sz) { turtle[sz] = result_hash[sz]; }
-    for (unsigned int sz = 0; sz < BIRTHDAYS_PER_HASH; ++sz) { hare[sz]   = result_hash[sz]; }
+    turtle_minhash = result_hash[0];
+    hare_minhash = result_hash[0];
+    for (unsigned int sz = 0; sz < BIRTHDAYS_PER_HASH; ++sz) {
+        turtle[sz] = result_hash[sz];
+        hare[sz] = result_hash[sz];
+        
+        if (result_hash[sz] < turtle_minhash) { 
+            turtle_minhash = result_hash[sz];
+            hare_minhash = result_hash[sz];
+        }
+    }
 
     
     // Step 1: dig for a hit
+    // Not using 2^(SEARCH_SPACE_BITS/2)
     uint32_t i;
-    for(i = 0; i < (1<<(SEARCH_SPACE_BITS/2)) + 1; ++i) {
+    for(i = 0; i < MAX_MOMENTUM_NONCE; ++i) {
         
         // TURTLE
         // X = H(X)
         ++turtle_offset;
-        if (turtle_offset >= BIRTHDAYS_PER_HASH) {
-            turtle_offset = turtle_offset % BIRTHDAYS_PER_HASH;
-            turtle_nonce = (turtle[0] >> (64 - SEARCH_SPACE_BITS)) % MAX_MOMENTUM_NONCE;
-            
-            *index = turtle_nonce;
-            SHA512((unsigned char *)hash_tmp, sizeof(hash_tmp), (unsigned char *)result_hash);
-            for (unsigned int sz = 0; sz < BIRTHDAYS_PER_HASH; ++sz) { turtle[sz] = result_hash[sz]; }
-        }
+        UPDATE_HASH(turtle);
         
         
         // HARE
         // X' = H( H(X) )
         hare_offset += 2;
-        if (hare_offset >= BIRTHDAYS_PER_HASH) {
-            hare_offset = hare_offset % BIRTHDAYS_PER_HASH;
-            hare_nonce = (hare[0] >> (64 - SEARCH_SPACE_BITS)) % MAX_MOMENTUM_NONCE;
-            
-            *index = hare_nonce;
-            SHA512((unsigned char *)hash_tmp, sizeof(hash_tmp), (unsigned char *)result_hash);
-            for (unsigned int sz = 0; sz < BIRTHDAYS_PER_HASH; ++sz) { hare[sz] = result_hash[sz]; }
-        }
+        UPDATE_HASH(hare);
 
         
         // Found a collision!
         if ((turtle[turtle_offset] >> (64 - SEARCH_SPACE_BITS)) == (hare[hare_offset] >> (64 - SEARCH_SPACE_BITS))) {
-            found_hit = true;
-            break;
+            if (turtle_nonce != hare_nonce && turtle_offset != hare_offset) {
+                found_hit = true;
+                break;
+            }
         }
     }
     
@@ -89,6 +105,11 @@ std::vector< std::pair<uint32_t, uint32_t> > momentum_search(uint256 midHash)
     std::cerr << "   Hare Offset:   " << hare_offset << "\n";
     std::cerr << "   Hare Hash:     " << (hare[hare_offset] >> (64 - SEARCH_SPACE_BITS)) << "\n";
     
+    results.push_back( std::make_pair(turtle_nonce + turtle_offset, hare_nonce + hare_offset) );
+    return results;
+    
+    
+    ////////////////////////////////////////////////
     
     // Set X' = X
     hare_nonce = turtle_nonce;
@@ -122,27 +143,13 @@ std::vector< std::pair<uint32_t, uint32_t> > momentum_search(uint256 midHash)
         // TURTLE
         // X = H(X)
         ++turtle_offset;
-        if (turtle_offset >= BIRTHDAYS_PER_HASH) {
-            turtle_offset = turtle_offset % BIRTHDAYS_PER_HASH;
-            turtle_nonce = (turtle[0] >> (64 - SEARCH_SPACE_BITS)) % MAX_MOMENTUM_NONCE;
-            
-            *index = turtle_nonce;
-            SHA512((unsigned char *)hash_tmp, sizeof(hash_tmp), (unsigned char *)result_hash);
-            for (unsigned int sz = 0; sz < BIRTHDAYS_PER_HASH; ++sz) { turtle[sz] = result_hash[sz]; }
-        }
+        UPDATE_HASH(turtle);
         
         
         // HARE
         // X' = H(X)
         ++hare_offset;
-        if (hare_offset >= BIRTHDAYS_PER_HASH) {
-            hare_offset = hare_offset % BIRTHDAYS_PER_HASH;
-            hare_nonce = (hare[0] >> (64 - SEARCH_SPACE_BITS)) % MAX_MOMENTUM_NONCE;
-            
-            *index = hare_nonce;
-            SHA512((unsigned char *)hash_tmp, sizeof(hash_tmp), (unsigned char *)result_hash);
-            for (unsigned int sz = 0; sz < BIRTHDAYS_PER_HASH; ++sz) { hare[sz] = result_hash[sz]; }
-        }
+        UPDATE_HASH(hare);
     }
     
 
