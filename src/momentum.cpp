@@ -85,6 +85,8 @@ std::vector< std::pair<uint32_t, uint32_t> > momentum_search(uint256 midHash)
             
             // Found a collision!
             if ((turtle_hash[turtle_offset] >> (64 - SEARCH_SPACE_BITS)) == (hare_hash[hare_offset] >> (64 - SEARCH_SPACE_BITS))) {
+            
+                // Are we stuck in a loop or find an actual collision?
                 if (turtle_nonce != hare_nonce && turtle_offset != hare_offset) {
                     std::cerr << "Collision found!\n";
                     std::cerr << "   Iteration:     " << i << "\n";
@@ -99,8 +101,10 @@ std::vector< std::pair<uint32_t, uint32_t> > momentum_search(uint256 midHash)
                     
                     found_hit = true;
                     results.push_back( std::make_pair(turtle_nonce + turtle_offset, hare_nonce + hare_offset) );
-                    break;
                 }
+                
+                // Either way, go get a new nonce
+                break;
             }
         }
         
