@@ -108,6 +108,14 @@ std::vector< std::pair<uint32_t, uint32_t> > momentum_search(uint256 midHash)
     for (j = 0; j < i; ++j) {
         if ((turtle[turtle_offset] >> (64 - SEARCH_SPACE_BITS)) == (hare[hare_offset] >> (64 - SEARCH_SPACE_BITS))) {
             results.push_back( std::make_pair(turtle_nonce + turtle_offset, hare_nonce + hare_offset) );
+            std::cerr << "WOOT WOOT!\n";
+            std::cerr << "   Iteration:     " << j << "\n";
+            std::cerr << "   Turtle Nonce:  " << turtle_nonce  << "\n";
+            std::cerr << "   Turtle Offset: " << turtle_offset << "\n";
+            std::cerr << "   Turtle Hash:   " << (turtle[turtle_offset] >> (64 - SEARCH_SPACE_BITS)) << "\n";
+            std::cerr << "   Hare Nonce:    " << hare_nonce  << "\n";
+            std::cerr << "   Hare Offset:   " << hare_offset << "\n";
+            std::cerr << "   Hare Hash:     " << (hare[hare_offset] >> (64 - SEARCH_SPACE_BITS)) << "\n";
             return results;
         }
         
