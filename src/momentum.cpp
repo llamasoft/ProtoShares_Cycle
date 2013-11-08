@@ -20,7 +20,7 @@ namespace bts
         varname##_minhash = result_hash[0];                                                    \
         for (unsigned int sz = 0; sz < BIRTHDAYS_PER_HASH; ++sz) {                             \
             if (result_hash[sz] < varname##_minhash) { varname##_minhash = result_hash[sz]; }  \
-            varname##[sz] = result_hash[sz];                                                   \
+            varname##_hash[sz] = result_hash[sz];                                                   \
         }                                                                                      \
     }
 
