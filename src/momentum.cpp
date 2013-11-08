@@ -31,8 +31,8 @@ std::vector< std::pair<uint32_t, uint32_t> > momentum_search(uint256 midHash)
     *index = 0;
     uint64_t result_hash[8];
     SHA512((unsigned char *)hash_tmp, sizeof(hash_tmp), (unsigned char *)result_hash);
-    turtle = result_hash;
-    hare = result_hash;
+    for (unsigned int sz = 0; sz < BIRTHDAYS_PER_HASH; ++sz) { turtle[sz] = result_hash[sz]; }
+    for (unsigned int sz = 0; sz < BIRTHDAYS_PER_HASH; ++sz) { hare[sz]   = result_hash[sz]; }
 
     
     // Dig for a hit.
@@ -49,7 +49,7 @@ std::vector< std::pair<uint32_t, uint32_t> > momentum_search(uint256 midHash)
             
             *index = turtle_nonce;
             SHA512((unsigned char *)hash_tmp, sizeof(hash_tmp), (unsigned char *)result_hash);
-            turtle = result_hash;
+            for (unsigned int sz = 0; sz < BIRTHDAYS_PER_HASH; ++sz) { turtle[sz] = result_hash[sz]; }
         }
         
         
@@ -62,7 +62,7 @@ std::vector< std::pair<uint32_t, uint32_t> > momentum_search(uint256 midHash)
             
             *index = hare_nonce;
             SHA512((unsigned char *)hash_tmp, sizeof(hash_tmp), (unsigned char *)result_hash);
-            hare = result_hash;
+            for (unsigned int sz = 0; sz < BIRTHDAYS_PER_HASH; ++sz) { hare[sz]   = result_hash[sz]; }
         }
 
         
