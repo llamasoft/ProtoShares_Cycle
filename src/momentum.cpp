@@ -67,14 +67,14 @@ std::vector< std::pair<uint32_t, uint32_t> > momentum_search(uint256 midHash)
 
         
         // Found a collision!
-        if (turtle[turtle_offset] >> (64 - SEARCH_SPACE_BITS) == hare[hare_offset] >> (64 - SEARCH_SPACE_BITS)) {
+        if ((turtle[turtle_offset] >> (64 - SEARCH_SPACE_BITS)) == (hare[hare_offset] >> (64 - SEARCH_SPACE_BITS))) {
             found_hit = true;
             break;
         }
     }
     
     // If we stopped due to running out of entries, return the empty list
-    if (!found_hit) {
+    if (found_hit == false) {
         std::cerr << "No collision found.\n";
         return results;
     }
