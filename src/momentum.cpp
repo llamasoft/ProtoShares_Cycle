@@ -38,7 +38,7 @@ std::vector< std::pair<uint32_t, uint32_t> > momentum_search(uint256 midHash)
     // Dig for a hit.
     // We can optimize out the backtrack step
     //    because we're keeping track of our nonces.
-    for(uint32_t i = 0; i < (1<<(SEARCH_SPACE_BITS/2) + 1); ++i) {
+    for(uint32_t i = 0; i < (1<<(SEARCH_SPACE_BITS/2)) + 1; ++i) {
         
         // TURTLE
         // X = H(X)
@@ -68,7 +68,7 @@ std::vector< std::pair<uint32_t, uint32_t> > momentum_search(uint256 midHash)
         
         // Found a collision!
         if (turtle[turtle_offset] >> (64 - SEARCH_SPACE_BITS) == hare[hare_offset] >> (64 - SEARCH_SPACE_BITS)) {
-            fount_hit = true;
+            found_hit = true;
             break;
         }
     }
