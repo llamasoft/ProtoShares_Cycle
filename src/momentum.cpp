@@ -45,7 +45,7 @@ std::vector< std::pair<uint32_t, uint32_t> > momentum_search(uint256 midHash)
         ++turtle_offset;
         if (turtle_offset >= BIRTHDAYS_PER_HASH) {
             turtle_offset = turtle_offset % BIRTHDAYS_PER_HASH;
-            turtle_nonce = (turtle_nonce + BIRTHDAYS_PER_HASH) % MAX_MOMENTUM_NONCE;
+            turtle_nonce = (turtle[0] >> (64 - SEARCH_SPACE_BITS)) % MAX_MOMENTUM_NONCE;
             
             *index = turtle_nonce;
             SHA512((unsigned char *)hash_tmp, sizeof(hash_tmp), (unsigned char *)result_hash);
@@ -58,11 +58,11 @@ std::vector< std::pair<uint32_t, uint32_t> > momentum_search(uint256 midHash)
         hare_offset += 2;
         if (hare_offset >= BIRTHDAYS_PER_HASH) {
             hare_offset = hare_offset % BIRTHDAYS_PER_HASH;
-            hare_nonce = (hare_nonce + BIRTHDAYS_PER_HASH) % MAX_MOMENTUM_NONCE;
+            hare_nonce = (hare[0] >> (64 - SEARCH_SPACE_BITS)) % MAX_MOMENTUM_NONCE;
             
             *index = hare_nonce;
             SHA512((unsigned char *)hash_tmp, sizeof(hash_tmp), (unsigned char *)result_hash);
-            for (unsigned int sz = 0; sz < BIRTHDAYS_PER_HASH; ++sz) { hare[sz]   = result_hash[sz]; }
+            for (unsigned int sz = 0; sz < BIRTHDAYS_PER_HASH; ++sz) { hare[sz] = result_hash[sz]; }
         }
 
         
