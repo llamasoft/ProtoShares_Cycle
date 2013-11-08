@@ -9,19 +9,21 @@ namespace bts
 #define BIRTHDAYS_PER_HASH 8
 
 // I'm a terrible person.
-#define UPDATE_HASH(varname)                                                                   \
-    if (varname##_offset >= BIRTHDAYS_PER_HASH) {                                              \
-        varname##_offset = varname##_offset % BIRTHDAYS_PER_HASH;                              \
-        varname##_nonce = varname##_minhash;                                                   \
-                                                                                               \
-        *index = varname##_nonce;                                                              \
-        SHA512((unsigned char *)hash_tmp, sizeof(hash_tmp), (unsigned char *)result_hash);     \
-                                                                                               \
-        varname##_minhash = result_hash[0];                                                    \
-        for (unsigned int sz = 0; sz < BIRTHDAYS_PER_HASH; ++sz) {                             \
-            if (result_hash[sz] < varname##_minhash) { varname##_minhash = result_hash[sz]; }  \
-            varname##_hash[sz] = result_hash[sz];                                                   \
-        }                                                                                      \
+#define UPDATE_HASH(varname)                                                               \
+    if (varname##_offset >= BIRTHDAYS_PER_HASH) {                                          \
+        varname##_offset = varname##_offset % BIRTHDAYS_PER_HASH;                          \
+        varname##_nonce = varname##_minhash;                                               \
+                                                                                           \
+        *index = varname##_nonce;                                                          \
+        SHA512((unsigned char *)hash_tmp, sizeof(hash_tmp), (unsigned char *)result_hash); \
+                                                                                           \
+        varname##_minhash = (result_hash[sz] >> (64 - SEARCH_SPACE_BITS));                 \
+        for (unsigned int sz = 0; sz < BIRTHDAYS_PER_HASH; ++sz) {                         \
+            if ((result_hash[sz] >> (64 - SEARCH_SPACE_BITS)) < varname##_minhash) {       \
+                varname##_minhash = (result_hash[sz] >> (64 - SEARCH_SPACE_BITS));         \
+            }                                                                              \
+            varname##_hash[sz] = result_hash[sz];                                          \
+        }                                                                                  \
     }
 
 std::vector< std::pair<uint32_t, uint32_t> > momentum_search(uint256 midHash)
