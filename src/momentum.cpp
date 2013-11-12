@@ -80,8 +80,6 @@ std::cerr << "         0: " << hash[0] << "\n"   \
 std::vector< std::pair<uint32_t, uint32_t> > momentum_search(uint256 midHash)
 {
     std::vector< std::pair<uint32_t, uint32_t> > results;
-    boost::unordered_map< uint64_t, uint32_t > rainbow( RAINBOW_ENTRIES );
-    rainbow.rehash( RAINBOW_ENTRIES );
 
     char hash_temp[sizeof(uint256) + 4];
     memcpy((char *)&hash_temp[4], (char *)&midHash, sizeof(midHash));
@@ -103,7 +101,7 @@ std::vector< std::pair<uint32_t, uint32_t> > momentum_search(uint256 midHash)
     HASH(0, hash_temp, turtle_hash);
     
     // Hare = F(X_0)
-    hare_nonce = COMPRESS(result_hash);
+    hare_nonce = COMPRESS_HASH(result_hash);
     HASH(hare_nonce, hash_temp, hare_hash);
     
     
@@ -132,7 +130,7 @@ std::vector< std::pair<uint32_t, uint32_t> > momentum_search(uint256 midHash)
             lam = 0;
         }
         
-        hare_nonce = COMPRESS(hare_hash);
+        hare_nonce = COMPRESS_HASH(hare_hash);
         HASH(hare_nonce, hash_temp, hare_hash);
         ++lam;
     }
@@ -147,12 +145,13 @@ std::vector< std::pair<uint32_t, uint32_t> > momentum_search(uint256 midHash)
     hare_nonce = 0;
     HASH_COPY(turtle_hash, hare_hash);
     
+    // Get hare up to speed
     for (uint32_t fastforward = 0; fastforward < lam; ++fastforward) {
-        hare_nonce = COMPRESS(hare_hash);
+        hare_nonce = COMPRESS_HASH(hare_hash);
         HASH(hare_nonce, hash_temp, hare_hash);
     }
     
-    
+    // Keep stepping until they match again
     while (true) {
         for (uint32_t chunk = 0; chunk < BIRTHDAYS_PER_HASH; ++chunk) {
             uint32_t offset = CONTAINS_HASH(hare[chunk], turtle_hash);
@@ -171,10 +170,10 @@ std::vector< std::pair<uint32_t, uint32_t> > momentum_search(uint256 midHash)
             }
         }
         
-        turtle_nonce = COMPRESS(turtle_hash);
+        turtle_nonce = COMPRESS_HASH(turtle_hash);
         HASH(turtle_nonce, hash_temp, turtle_hash);
         
-        hare_nonce = COMPRESS(hare_hash);
+        hare_nonce = COMPRESS_HASH(hare_hash);
         HASH(hare_nonce, hash_temp, hare_hash);
     }
     
