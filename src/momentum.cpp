@@ -10,7 +10,7 @@ uint64_t getBirthdayHash(const uint256 &midHash, uint32_t a);
 #define SEARCH_SPACE_BITS  ( 50 )
 #define BIRTHDAYS_PER_HASH ( 8 )
 
-#define DEBUG_MODE ( 0 )
+#define DEBUG_MODE ( 1 )
 
 
 ///// UTILITY FUNCTIONS /////
@@ -110,7 +110,7 @@ std::vector< std::pair<uint32_t, uint32_t> > momentum_search(uint256 midHash)
             uint32_t offset = CONTAINS_HASH(hare_hash[chunk], turtle_hash);
             
             if (offset != 0xFF) {
-                if (DEBUG) {
+                if (DEBUG_MODE) {
                     std::cerr << "Found hit PART 1\n";
                     std::cerr << "Hare Nonce: " << hare_nonce << " + " << chunk << "\n";
                     PRINT_HASH(hare_hash);
@@ -157,7 +157,7 @@ std::vector< std::pair<uint32_t, uint32_t> > momentum_search(uint256 midHash)
             uint32_t offset = CONTAINS_HASH(hare_hash[chunk], turtle_hash);
             
             if (offset != 0xFF) {
-                if (DEBUG) {
+                if (DEBUG_MODE) {
                     std::cerr << "Found hit PART 2\n";
                     std::cerr << "Hare Nonce: " << hare_nonce << " + " << chunk << "\n";
                     PRINT_HASH(hare_hash);
