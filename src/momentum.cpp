@@ -143,7 +143,7 @@ std::vector< std::pair<uint32_t, uint32_t> > momentum_search(uint256 midHash)
     turtle_nonce = 0;
     HASH(turtle_nonce, hash_temp, turtle_hash);
     hare_nonce = 0;
-    HASH_COPY(turtle_hash, hare_hash);
+    COPY_HASH(turtle_hash, hare_hash);
     
     // Get hare up to speed
     for (uint32_t fastforward = 0; fastforward < lam; ++fastforward) {
