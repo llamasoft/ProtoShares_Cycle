@@ -107,7 +107,7 @@ std::vector< std::pair<uint32_t, uint32_t> > momentum_search(uint256 midHash)
     
     while (power <= MAX_MOMENTUM_NONCE) {
         for (uint32_t chunk = 0; chunk < BIRTHDAYS_PER_HASH; ++chunk) {
-            uint32_t offset = CONTAINS_HASH(hare[chunk], turtle_hash);
+            uint32_t offset = CONTAINS_HASH(hare_hash[chunk], turtle_hash);
             
             if (offset != 0xFF) {
                 if (DEBUG) {
@@ -115,7 +115,7 @@ std::vector< std::pair<uint32_t, uint32_t> > momentum_search(uint256 midHash)
                     std::cerr << "Hare Nonce: " << hare_nonce << " + " << chunk << "\n";
                     PRINT_HASH(hare_hash);
                     std::cerr << "Trtl Nonce: " << turtle_nonce << " + " << offset << "\n";
-                    PRITN_HASH(turtle_hash);
+                    PRINT_HASH(turtle_hash);
                 }
                 
                 break;
@@ -154,7 +154,7 @@ std::vector< std::pair<uint32_t, uint32_t> > momentum_search(uint256 midHash)
     // Keep stepping until they match again
     while (true) {
         for (uint32_t chunk = 0; chunk < BIRTHDAYS_PER_HASH; ++chunk) {
-            uint32_t offset = CONTAINS_HASH(hare[chunk], turtle_hash);
+            uint32_t offset = CONTAINS_HASH(hare_hash[chunk], turtle_hash);
             
             if (offset != 0xFF) {
                 if (DEBUG) {
@@ -162,7 +162,7 @@ std::vector< std::pair<uint32_t, uint32_t> > momentum_search(uint256 midHash)
                     std::cerr << "Hare Nonce: " << hare_nonce << " + " << chunk << "\n";
                     PRINT_HASH(hare_hash);
                     std::cerr << "Trtl Nonce: " << turtle_nonce << " + " << offset << "\n";
-                    PRITN_HASH(turtle_hash);
+                    PRINT_HASH(turtle_hash);
                 }
                 
                 results.push_back( std::make_pair( hare_nonce + chunk, turtle_nonce + offset ) );
